@@ -1,5 +1,5 @@
 publish.bat
-built.bat
+build.bat
 test.bat
 
 # Byte-compiled / optimized / DLL files
