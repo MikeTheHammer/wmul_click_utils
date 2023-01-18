@@ -1,6 +1,7 @@
 publish.bat
 build.bat
 test.bat
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
