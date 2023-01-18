@@ -24,17 +24,32 @@ Example:
               help="The password to authenticate with the e-mail server.")
 ```
 
-## MXWith
-Another `click.Option` and the opposite of `RequiredIf`. Allows two or more 
-options to be designated as mutually exclusive. E.G. logging to a logfile or
-logging to syslog.
+## RequiredUnless
+Another `click.Option`. Allows an option to be designated as required only if 
+some other option is not provided. E.G. An e-mail address and a username. 
+Either or both might be provided, but at least one is needed.
 
-`mx_with` is one or more other options that are mutually exclusive with this 
-one.
+`required_unless` is one or more other options in a list. If none of the 
+options are present, an error is raised.
+
+Example:   
+```
+@click.option("--username", type=str cls=RequiredUnless, 
+              required_unless=["email_address"])
+@click.option("--email_address", type=str, cls=RequiredUnless, 
+              required_unless=["username"])
+```
+
+## MXWith
+Another `click.Option`. Allows two or more options to be designated as mutually 
+exclusive. E.G. logging to a logfile or logging to syslog.
+
+`mx_with` is one or more other options in a list that are mutually exclusive 
+with this one.
 
 Example:
 ```
-@click.option('--syslog', is_flag=True, cls=MXWith, mx_with='log_file_name',
+@click.option('--syslog', is_flag=True, cls=MXWith, mx_with=['log_file_name'],
               help="log to syslog.")
 @click.option(
     '--log_file_name',
@@ -45,10 +60,20 @@ Example:
         writable=True
     ), 
     cls=MXWith,
-    mx_with="syslog",  
+    mx_with=["syslog"],  
     help="Log to this filename."
 )
 ```
+
+## RequiredUnless / MXWith Comparison
+These two operate similarly. The difference is when multiple options or no 
+options are provided. 
+
+`RequiredUnless` makes certain that at __least__ one of the options is present. 
+Multiple or all of the options may be provided without error. 
+
+`MXWith` makes certain that at __most__ one option is present. If none of the
+options are provided, no error is raised.
 
 ## PairedParamType / PAIRED
 A click.ParamType that allows a parameter to accept a list of pairs. 

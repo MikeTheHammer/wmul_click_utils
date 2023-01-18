@@ -7,6 +7,8 @@ MXWith based upon https://stackoverflow.com/a/44349292/521402
 and https://stackoverflow.com/a/51235564/521402
 
 ============ Change Log ============
+01/18/2023 = Added RequiredUnless
+
 01/17/2023 = Extracted to separate package.
 
 ============ License ============
@@ -26,7 +28,7 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with 
 wmul_click_utils. If not, see <https://www.gnu.org/licenses/>. 
 """
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 import click
 from datetime import datetime
 
@@ -52,6 +54,35 @@ class RequiredIf(click.Option):
                 self.prompt = None
 
         return super(RequiredIf, self).handle_parse_result(ctx, opts, args)
+
+
+class RequiredUnless(click.Option):
+    def __init__(self, *args, **kwargs):
+        self.required_unless = set(kwargs.pop('required_unless'))
+        assert self.required_unless, "'required_unless' parameter required"
+
+        kwargs_help = kwargs.get('help', '')
+        req_unless_keys = ", ".join(self.required_unless)
+        req_unless_help = " NOTE: This option is required unless "\
+                          f"one of {req_unless_keys} is supplied."
+        kwargs['help'] = f"{kwargs_help}{req_unless_help}".strip()
+
+        super(RequiredUnless, self).__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx, opts, args):
+        current_opt = self.name in opts
+
+        if not current_opt:
+            if self.required_unless.isdisjoint(opts):
+                raise click.UsageError(
+                    f"Illegal usage: '{self.name}' is required unless "
+                    f"one of '{', '.join(self.required_unless)}' is "
+                        "supplied."
+                )
+            else:
+                self.prompt = None
+
+        return super(RequiredUnless, self).handle_parse_result(ctx, opts, args)
 
 
 class MXWith(click.Option):
