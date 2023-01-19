@@ -7,6 +7,9 @@ MXWith based upon https://stackoverflow.com/a/44349292/521402
 and https://stackoverflow.com/a/51235564/521402
 
 ============ Change Log ============
+01/19/2023 = Modify MXWith and RequiredUnless to accept either a string for a 
+             single other option, or a list of other options.
+
 01/18/2023 = Added RequiredUnless
 
 01/17/2023 = Extracted to separate package.
@@ -28,7 +31,7 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with 
 wmul_click_utils. If not, see <https://www.gnu.org/licenses/>. 
 """
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 import click
 from datetime import datetime
 
@@ -58,7 +61,12 @@ class RequiredIf(click.Option):
 
 class RequiredUnless(click.Option):
     def __init__(self, *args, **kwargs):
-        self.required_unless = set(kwargs.pop('required_unless'))
+        req_unless = kwargs.pop('required_unless')
+        if isinstance(req_unless, str):
+            req_unless = { req_unless }
+        else:
+            req_unless = set(req_unless)
+        self.required_unless = req_unless
         assert self.required_unless, "'required_unless' parameter required"
 
         kwargs_help = kwargs.get('help', '')
@@ -87,7 +95,10 @@ class RequiredUnless(click.Option):
 
 class MXWith(click.Option):
     def __init__(self, *args, **kwargs):
-        self.mx_with = kwargs.pop('mx_with')
+        mx_with = kwargs.pop('mx_with')
+        if isinstance(mx_with, str):
+            mx_with = [mx_with]
+        self.mx_with = mx_with
         assert self.mx_with, "'mx_with' parameter required"
 
         kwargs_help = kwargs.get('help', '')

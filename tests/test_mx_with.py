@@ -25,15 +25,34 @@ import click
 import pytest
 from click.testing import CliRunner
 from wmul_click_utils import MXWith
-from wmul_test_utils import make_namedtuple
+from wmul_test_utils import make_namedtuple, \
+    generate_true_false_matrix_from_list_of_strings
 
 
-@pytest.fixture(scope="function")
-def setup_mx_with_two():
+mx_with_two_params, mx_with_two_ids = \
+    generate_true_false_matrix_from_list_of_strings(
+        "mx_with_two",
+        [
+            "use_list"
+        ]
+    )
+
+@pytest.fixture(scope="function", params=mx_with_two_params, 
+                ids=mx_with_two_ids)
+def setup_mx_with_two(request):
+    params = request.param
+
+    foo_mx_with = "bar"
+    bar_mx_with = "foo"
+
+    if params.use_list:
+        foo_mx_with = [foo_mx_with]
+        bar_mx_with = [bar_mx_with]
+
     @click.command()
-    @click.option("--foo", type=str, cls=MXWith, mx_with=["bar"], 
+    @click.option("--foo", type=str, cls=MXWith, mx_with=foo_mx_with, 
                   help="foo help")
-    @click.option("--bar", type=str, cls=MXWith, mx_with=["foo"], 
+    @click.option("--bar", type=str, cls=MXWith, mx_with=bar_mx_with, 
                   help="bar help")
     def cli(foo, bar):
         click.echo(f"foo={foo} bar={bar}")

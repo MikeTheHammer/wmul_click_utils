@@ -29,8 +29,9 @@ Another `click.Option`. Allows an option to be designated as required only if
 some other option is not provided. E.G. An e-mail address and a username. 
 Either or both might be provided, but at least one is needed.
 
-`required_unless` is one or more other options in a list. If none of the 
-options are present, an error is raised.
+`required_unless` is one or more other options in a list. A single option may be
+ either a lone string or a string in a list ( `"foo"` or `["foo"]` ). If none 
+of the options are present, an error is raised.
 
 Example:   
 ```
@@ -45,7 +46,8 @@ Another `click.Option`. Allows two or more options to be designated as mutually
 exclusive. E.G. logging to a logfile or logging to syslog.
 
 `mx_with` is one or more other options in a list that are mutually exclusive 
-with this one.
+with this one. A single option may be either a lone string or a string in a 
+list ( `"foo"` or `["foo"]` ).
 
 Example:
 ```

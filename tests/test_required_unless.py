@@ -25,15 +25,31 @@ import click
 import pytest
 from click.testing import CliRunner
 from wmul_click_utils import RequiredUnless
-from wmul_test_utils import make_namedtuple
+from wmul_test_utils import make_namedtuple, \
+    generate_true_false_matrix_from_list_of_strings
 
 
-@pytest.fixture(scope="function")
-def setup_required_unless():
+required_unless_params, required_unless_ids = \
+    generate_true_false_matrix_from_list_of_strings(
+        "required_unless",
+        [
+            "use_list"
+        ]
+    )
+
+@pytest.fixture(scope="function", params=required_unless_params, 
+                ids=required_unless_ids)
+def setup_required_unless(request):
+    params = request.param
+
+    bar_req_unless = "foo"
+    if params.use_list:
+        bar_req_unless = [bar_req_unless]
+
     @click.command()
     @click.option("--foo", type=str, help="foo help")
     @click.option("--bar", type=str, cls=RequiredUnless, 
-        required_unless=["foo"], help="bar help")
+        required_unless=bar_req_unless, help="bar help")
     def cli(foo, bar):
         if foo:
             click.echo(f"foo={foo}")
@@ -99,13 +115,23 @@ def test_neither_present(setup_required_unless):
     assert "Illegal usage: bar is required unless one of 'foo' is supplied."
 
 
-@pytest.fixture(scope="function")
-def setup_required_unless_both_required():
+@pytest.fixture(scope="function", params=required_unless_params, 
+                ids=required_unless_ids)
+def setup_required_unless_both_required(request):
+    params = request.param
+
+    foo_req_unless = "bar"
+    bar_req_unless = "foo"
+
+    if params.use_list:
+        foo_req_unless = [foo_req_unless]
+        bar_req_unless = [bar_req_unless]
+
     @click.command()
     @click.option("--foo", type=str, cls=RequiredUnless, 
-        required_unless=["bar"], help="foo help")
+        required_unless=foo_req_unless, help="foo help")
     @click.option("--bar", type=str, cls=RequiredUnless, 
-        required_unless=["foo"], help="bar help")
+        required_unless=bar_req_unless, help="bar help")
     def cli(foo, bar):
         if foo:
             click.echo(f"foo={foo}")
